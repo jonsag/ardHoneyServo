@@ -121,29 +121,44 @@ void loop() {
 
   checkStatusChange();
 
-  if (autoSwitchState == 1) {
-    autoRun();
+  if (autoSwitchState == 0) {
+    manualRun();
   }
   else {
-    manualRun();
+    autoRun();
   }
 }
 
 void writeLCD() {
   lcd.setCursor(0, 0);
   if (autoSwitchState == 1) {
-    lcd.print("Auto  ");
+    lcd.print("Auto");
   }
   else {
-    lcd.print("Manual");
+    lcd.print("Man.");
   }
 
-  lcd.setCursor(7, 0);
-  if (spinning == 1) {
+  lcd.setCursor(5, 0);
+  if (spinning == 1 && autoSwitchState == 0) {
     lcd.print("Running");
   }
+  else if (spinning == 1 && program11 == 1) {
+    lcd.print("Pr1-1: ");
+  }
+  else if (spinning == 1 && program12 == 1) {
+    lcd.print("Pr1-2: ");
+  }
+  else if (spinning == 1 && program21 == 1) {
+    lcd.print("Pr2-1: ");
+  }
+  else if (spinning == 1 && program11 == 1) {
+    lcd.print("Pr2-2: ");
+  }
+  else if (autoSwitchState == 0 && spinning == 0) {
+    lcd.print("Stopped ");
+  }
   else {
-    lcd.print("Stopped");
+    lcd.print("Error...");
   }
 
   lcd.setCursor(0, 1);
@@ -165,10 +180,8 @@ void writeLCD() {
   //lcd.setCursor(7, 0);
   //lcd.print(motorSpeedLength);
   lcd.setCursor(6, 1);
-  lcd.print("Speed:    ");
-  lcd.setCursor(12, 1);
   lcd.print(motorSpeed);
-  lcd.setCursor(12 + motorSpeedLength, 1);
+  lcd.setCursor(6 + motorSpeedLength, 1);
   lcd.print("%");
 }
 
@@ -190,14 +203,17 @@ void checkStatusChange() {
     writeLCD();
     lastPotVal = potVal;
   }
+  
   if (startStopButtonState != lastStartStopButtonState) {
-    if (startStopButtonState == 1 && lastStartStopButtonState == 0 && millis() - startStopTime > debounce && autoSwitchState == 0) {
+    if (startStopButtonState == 1 && lastStartStopButtonState == 0 && millis() - startStopTime > debounce) {
       if (spinning == 1) {
         spinning = 0;
       }
       else {
         spinning = 1;
       }
+      //program11 = 0;
+      //program12 = 0;
       powerControl();
     }
     //writeSerial();
@@ -205,21 +221,26 @@ void checkStatusChange() {
     lastStartStopButtonState = startStopButtonState;
     startStopTime = millis();
   }
+  
   if (program1ButtonState != lastProgram1ButtonState) {
-    if (program1ButtonState == 1 && lastProgram1ButtonState == 0) {
+    if (program1ButtonState == 1 && lastProgram1ButtonState == 0 && autoSwitchState == 1) {
       program11 = 1;
+      program11StartTime = millis();
     }
     //writeSerial();
     writeLCD();
     lastProgram1ButtonState = program1ButtonState;
   }
+  
   if (program2ButtonState != lastProgram2ButtonState) {
     //writeSerial();
     writeLCD();
     lastProgram2ButtonState = program2ButtonState;
   }
   if (autoSwitchState != lastAutoSwitchState) {
-    servoControl();
+    spinning = 0;
+    servoAngle = 0;
+    powerControl();
     //writeSerial();
     writeLCD();
     lastAutoSwitchState = autoSwitchState;
@@ -255,9 +276,8 @@ void autoRun() {
     spinning = 1;
     writeLCD();
     powerControl();
-    program11StartTime = millis();
   }
-  if (program11 == 1 && program11Time >= millis() - program11StartTime) {
+  if (program11 == 1 && program11Time >= (millis() - program11StartTime)) {
     if (leftSwitchState == 1) {
       servoAngle = 90 - program12Angle;
     }
@@ -266,13 +286,16 @@ void autoRun() {
     }
     writeLCD();
     servoControl();
+    program11 = 0;
+    program12 = 1;
     program12StartTime = millis();
   }
-  if (program12 == 1 && program12Time >= millis() - program12StartTime) {
+  if (program12 == 1 && program12Time >= (millis() - program12StartTime)) {
     servoAngle = 90;
     spinning = 0;
     writeLCD();
     powerControl();
+    program12 = 0;
     program11StartTime = 0;
     program12StartTime = 0;
   }
