@@ -10,15 +10,15 @@
 
 Servo myservo;  // create servo object to control a servo
 
-///// initialize the library with the numbers of the interface pins
+///// initialize the LCD library with the numbers of the interface pins
 LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 
-int potPin = 0;  // analog pin used to connect the potentiometer
-int potVal;    // variable to read the value from the analog pin
+int manualAnglePin = 0;  // analog pin used to connect the potentiometer
+int manualAngle;    // variable to read the value from the analog pin
 String potString = "";
 int potLength = 0;
 int potPosition = 0;
-int lastPotVal = 0; // stores last value from pot
+int lastManualAngle = 0; // stores last value from pot
 int maxAngle = 70; // maximum degrees for the servo in each direction
 String motorSpeedString = "";
 int motorSpeedLength = 0;
@@ -71,19 +71,19 @@ int i = 0; // just a counter
 
 int program11 = 0;
 int program11Percent = 25;
-long program11RunTime = 60000;
+long program11RunTime = 60; // first sequence run time in seconds
 long program11StartTime = 0;
 int program12 = 0;
 int program12Percent = 50;
-long program12RunTime = 120000;
+long program12RunTime = 120; // second sequence run time in seconds
 long program12StartTime = 0;
 
 int program21 = 0;
 int program21Percent = 50;
-long program21RunTime = 2000;
+long program21RunTime = 2;
 int program22 = 0;
 int program22Percent = 75;
-long program22RunTime = 2000;
+long program22RunTime = 2;
 
 int displayTime = 0;
 String timeString = "";
@@ -110,7 +110,7 @@ void setup() {
 }
 
 void loop() {
-  potVal = analogRead(potPin); // reads the value of the potentiometer (value between 0 and 1023)
+  manualAngle = analogRead(manualAnglePin); // reads the value of the potentiometer (value between 0 and 1023)
   startStopButtonState = digitalRead(startStopButton);
   program1ButtonState = digitalRead(program1Button);
   program2ButtonState = digitalRead(program2Button);
@@ -213,7 +213,7 @@ void writeLCD() {
     lcd.print("s   ");
   }
   else {
-    potPosition = map(potVal, 0, 1023, 0, 100);
+    potPosition = map(manualAngle, 0, 1023, 0, 100);
     potString = String(potPosition);
     potLength = potString.length();
     lcd.setCursor(11, 1);
@@ -226,10 +226,10 @@ void writeLCD() {
 void manualRun() {
   ////////////////////////////////////////// Checking inputs ///////////////////////////////////////////
   ///// Potentiometer
-  if (potVal < lastPotVal - 5 || potVal > lastPotVal + 5) {
+  if (manualAngle < lastManualAngle - 5 || manualAngle > lastManualAngle + 5) {
     powerControl();
     writeLCD();
-    lastPotVal = potVal;
+    lastManualAngle = manualAngle;
   }
   ///// Start/Stop-button
   if (startStopButtonState != lastStartStopButtonState) {
@@ -321,7 +321,7 @@ void autoRun() {
     writeLCD();
     powerControl();
   }
-  if (program11 == 1 && millis() - program11StartTime > program11RunTime) { // Program 1-2 starts
+  if (program11 == 1 && millis() - program11StartTime > (program11RunTime * 1000)) { // Program 1-2 starts
     program11 = 0; // Sequence 1-1 stops
     program12 = 1;
     program12StartTime = millis();
@@ -335,7 +335,7 @@ void autoRun() {
     powerControl();
   }
 
-  if (program12 == 1 && millis() - program12StartTime > program12RunTime) { // Last sequence finished
+  if (program12 == 1 && millis() - program12StartTime > (program12RunTime * 1000)) { // Last sequence finished
     servoAngle = 90;
     spinning = 0;
     writeLCD();
@@ -346,10 +346,10 @@ void autoRun() {
   ///// Running time left
   if (spinning == 1) {
     if (program11 == 1) {
-      displayTime = (program11RunTime - millis() + program11StartTime) / 1000;
+      displayTime = ((program11RunTime * 1000) - millis() + program11StartTime) / 1000;
     }
     else if (program12 == 1) {
-      displayTime = (program12RunTime - millis() + program12StartTime) / 1000;
+      displayTime = ((program12RunTime * 1000) - millis() + program12StartTime) / 1000;
     }
   }
   else {
@@ -363,11 +363,11 @@ void powerControl() {
     servoAngle = 90;
   }
   else if (autoSwitchState == 0) {
-    servoAngle = map(potVal, 1023, 0, servoLow, servoHigh);
+    servoAngle = map(manualAngle, 1023, 0, servoLow, servoHigh);
   }
 
   myservo.write(servoAngle); // sets the servo position according to the scaled value
-  delay(100); // waits for the servo to get there
+  delay(15); // waits for the servo to get there
   digitalWrite(spinnerRelay, spinning);
 }
 
