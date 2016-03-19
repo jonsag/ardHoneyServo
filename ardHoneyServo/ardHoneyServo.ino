@@ -14,15 +14,24 @@ Servo myservo;  // create servo object to control a servo
 LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 
 int manualAnglePin = 0;  // analog pin used to connect the potentiometer
-int manualAngle;    // variable to read the value from the analog pin
-String potString = "";
-int potLength = 0;
-int potPosition = 0;
-int lastManualAngle = 0; // stores last value from pot
-int maxAngle = 70; // maximum degrees for the servo in each direction
-String motorSpeedString = "";
-int motorSpeedLength = 0;
-int servoAngle = 0;
+int maxAnglePin = 1; // analog pin used to set max angle
+int zeroOffsetPin = 2; // analog pin used to set zero angle
+
+int manualAngleValue;    // variable to read the value from the analog pin
+int lastmanualAngleValue = 0; // stores last value from pot
+String potString = ""; // holds pot value as string
+int potLength = 0; // holds number of characters for potString
+int potPosition = 0; // holds position of print to lcd
+
+int maxAngleValue; // variable to read the value from analog pin
+int zeroOffsetValue; // variable to read the value from analog pin
+
+String motorSpeedString = ""; // holds speed as string
+int motorSpeedLength = 0; // holds number of characters for motorSpeedString
+
+int maxAngle; // maximum degrees for the servo in each direction
+int zeroOffset; // value for zero offset of servo
+int servoAngle = 0; 
 int motorSpeed = 0;
 int servoLow = 0;
 int servoHigh = 0;
@@ -110,7 +119,10 @@ void setup() {
 }
 
 void loop() {
-  manualAngle = analogRead(manualAnglePin); // reads the value of the potentiometer (value between 0 and 1023)
+  manualAngleValue = analogRead(manualAnglePin); // reads the value of the potentiometer (value between 0 and 1023)
+  maxAngleValue = analogRead(maxAnglePin);
+  zeroOffsetValue = analogRead(zeroOffsetPin);
+  
   startStopButtonState = digitalRead(startStopButton);
   program1ButtonState = digitalRead(program1Button);
   program2ButtonState = digitalRead(program2Button);
@@ -130,6 +142,11 @@ void loop() {
     lastAutoSwitchState = autoSwitchState;
   }
 
+  ///// Set zero offset for servo
+  zeroOffset = map(zeroOffsetValue, 1023, 0, -25, 25);
+  ///// Set max angle for servo
+  maxAngle = map(maxAngleValue, 0, 1023, 0, 90);
+  
   if (autoSwitchState == 0) {
     manualRun();
   }
@@ -213,7 +230,7 @@ void writeLCD() {
     lcd.print("s   ");
   }
   else {
-    potPosition = map(manualAngle, 0, 1023, 0, 100);
+    potPosition = map(manualAngleValue, 0, 1023, 0, 100);
     potString = String(potPosition);
     potLength = potString.length();
     lcd.setCursor(11, 1);
@@ -226,10 +243,10 @@ void writeLCD() {
 void manualRun() {
   ////////////////////////////////////////// Checking inputs ///////////////////////////////////////////
   ///// Potentiometer
-  if (manualAngle < lastManualAngle - 5 || manualAngle > lastManualAngle + 5) {
+  if (manualAngleValue < lastmanualAngleValue - 5 || manualAngleValue > lastmanualAngleValue + 5) {
     powerControl();
     writeLCD();
-    lastManualAngle = manualAngle;
+    lastmanualAngleValue = manualAngleValue;
   }
   ///// Start/Stop-button
   if (startStopButtonState != lastStartStopButtonState) {
@@ -363,10 +380,10 @@ void powerControl() {
     servoAngle = 90;
   }
   else if (autoSwitchState == 0) {
-    servoAngle = map(manualAngle, 1023, 0, servoLow, servoHigh);
+    servoAngle = map(manualAngleValue, 1023, 0, servoLow, servoHigh);
   }
 
-  myservo.write(servoAngle); // sets the servo position according to the scaled value
+  myservo.write(servoAngle + zeroOffset); // sets the servo position according to the scaled value
   delay(15); // waits for the servo to get there
   digitalWrite(spinnerRelay, spinning);
 }
