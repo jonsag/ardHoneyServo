@@ -1,3 +1,4 @@
+
 /*
   ardHoneyServo
   by Jon Sagebrand
@@ -6,12 +7,15 @@
 */
 
 #include <Servo.h>
-#include <LiquidCrystal.h>
+#include <LiquidCrystal595.h> // 3 pin LCD
+//#include <LiquidCrystal.h> // 6 pin LCD
+
 
 Servo myservo;  // create servo object to control a servo
 
 ///// initialize the LCD library with the numbers of the interface pins
-LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+LiquidCrystal595 lcd(5, 6, 7); // 3 pin LCD: datapin, latchpin, clockpin
+// LiquidCrystal lcd(7, 6, 5, 4, 3, 2); // 6 pin LCD
 
 int manualAnglePin = 0;  // analog pin used to connect the potentiometer
 int maxAnglePin = 1; // analog pin used to set max angle
@@ -37,7 +41,7 @@ int servoLow = 0;
 int servoHigh = 0;
 
 ///// Outputs:
-int spinnerRelay = 1;
+int spinnerRelay = 4; // pin to set relay
 
 int spinning = 0;
 
@@ -100,10 +104,14 @@ int timeLength = 0;
 
 void setup() {
   ///// set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
+  lcd.begin(16, 2);  // define LCD layout
+  lcd.clear();
+  lcd.setCursor(0,0);
   lcd.print("Booting...");
+  delay(500);
   lcd.setCursor(0, 1);
   lcd.print("Init. in/outputs");
+  delay(500);
   pinMode(startStopButton, INPUT);
   pinMode(program1Button, INPUT);
   pinMode(program2Button, INPUT);
@@ -115,6 +123,7 @@ void setup() {
   lcd.setCursor(0, 1);
   lcd.print("Attaching servo ");
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
+  delay(500);
   lcd.clear();
 }
 
