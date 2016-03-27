@@ -75,7 +75,17 @@ int leftSwitchState = 0;
 int lastLeftSwitchState = 0;
 // int lastRightSwitchState = 0;
 
+///// Rotary encoder
+const int encoderCLK = 1; // Rotary encoder CLK signal
+const int encoderDT = 2; // Rotary encoder DT signal
+const int encoderSW = 3; // Rotary encoders switch, goes LOW when pressed
+int encoderCLKState = 0;
+int encoderDTState = 0;
+int encoderSWState = 0;
+int lastEncoderSWState = 0;
+
 long startStopTimeMillis = 0; // the last time Start/Stop was toggled
+long encoderSWTimeMillis = 0; // the last time encoder button was toggled
 long debounce = 200;   // the debounce time, increase if the output flickers
 
 int program11 = 0; // set when in auto sequence 1-1
@@ -128,6 +138,9 @@ void setup() {
   pinMode(leftSwitch, INPUT);
   //pinMode(rightSwitch, INPUT);
   pinMode(spinnerRelay, OUTPUT);
+  pinMode(encoderCLK, INPUT);
+  pinMode(encoderDT, INPUT);
+  pinMode(encoderSW, INPUT);
   lcd.setCursor(0, 1);
   lcd.print("Attaching servo ");
   myservo.attach(9);  // attaches the servo on pin 9 to the servo object
@@ -475,8 +488,23 @@ void autoRun() {
 }
 
 void programSequence1() {
+  encoderCLKState = digitalRead(encoderCLK);
+  encoderDTState = digitalRead(encoderDT);
+  encoderSWState = digitalRead(encoderSW);
+
+  if (encoderSWState != lastEncoderSWState) {
+    if (encoderSWState == 0 && lastEncoderSWState == 1 && millis() - encoderSWTimeMillis > debounce) {
+      programModeValue++;
+      if (programModeValue >= 5) {
+        programModeValue = 1;
+      }
+      lastEncoderSWState = encoderSWState;
+      encoderSWTimeMillis = millis();
+    }
+  }
   blinkColon();
 }
+
 
 void programSequence2() {
   lcd.clear();
