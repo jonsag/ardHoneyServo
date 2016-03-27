@@ -82,6 +82,7 @@ const int encoderSW = 3; // Rotary encoders switch, goes LOW when pressed
 int encoderCLKState = 0;
 int encoderDTState = 0;
 int encoderSWState = 0;
+int lastEncoderDTState = 0;
 int lastEncoderSWState = 0;
 
 long startStopTimeMillis = 0; // the last time Start/Stop was toggled
@@ -491,6 +492,16 @@ void programSequence1() {
   encoderCLKState = digitalRead(encoderCLK);
   encoderDTState = digitalRead(encoderDT);
   encoderSWState = digitalRead(encoderSW);
+
+   if ((lastEncoderDTState == 0) && (encoderDTState == 1)) {
+     if (encoderCLKState == 0) {
+       program11Percent++;
+     } else {
+       program11Percent--;
+     }
+     writeLCDProgramMode(program11Percent, program11RunTime, program12Percent, program12RunTime);
+   } 
+   lastEncoderDTState = encoderDTState;
 
   if (encoderSWState != lastEncoderSWState) {
     if (encoderSWState == 0 && lastEncoderSWState == 1 && millis() - encoderSWTimeMillis > debounce) {
