@@ -210,6 +210,7 @@ void loop() {
     lcd.print("mode...");
     delay(1000);
     lcd.clear();
+    writeLCD();
   }
 
   if (programMode1 == 1) {
@@ -495,9 +496,15 @@ void programSequence1() {
 
    if ((lastEncoderDTState == 0) && (encoderDTState == 1)) {
      if (encoderCLKState == 0) {
-       program11Percent++;
-     } else {
        program11Percent--;
+       if (program11Percent <= 0) {
+        program11Percent = 0;
+       }
+     } else {
+       program11Percent++;
+       if (program11Percent >= 100) {
+        program11Percent = 100;
+       }
      }
      writeLCDProgramMode(program11Percent, program11RunTime, program12Percent, program12RunTime);
    } 
