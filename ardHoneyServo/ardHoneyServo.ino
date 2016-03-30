@@ -91,12 +91,12 @@ long debounce = 200;   // the debounce time, increase if the output flickers
 
 int program11 = 0; // set when in auto sequence 1-1
 int program11Percent = 25; // initial value, in percent, for servo in auto sequence 1-1
-int program11RunTime = 60; // initial time, in seconds, for auto sequence 1-1
-int program11StartTime = 0;
+unsigned long program11RunTime = 60; // initial time, in seconds, for auto sequence 1-1
+unsigned long program11StartTime = 0;
 int program12 = 0; // set when in auto sequence 1-2
 int program12Percent = 50; // initial value, in percent,  for servo in auto sequence 1-2
-int program12RunTime = 120; // initial time, in seconds, for auto sequence 1-2
-int program12StartTime = 0;
+unsigned long program12RunTime = 120; // initial time, in seconds, for auto sequence 1-2
+unsigned long program12StartTime = 0;
 bool programMode1 = 0;
 int programModeValue = 0; // what of the values are being programmed
 unsigned long blinkColonMillis;
@@ -105,11 +105,11 @@ String blinkChar = "=";
 
 int program21 = 0; // set when in auto sequence 2-1
 int program21Percent = 50; // initial value, in percent,  for servo in auto sequence 2-1
-int program21RunTime = 30; // initial time, in seconds, for auto sequence 2-1
+unsigned long program21RunTime = 30; // initial time, in seconds, for auto sequence 2-1
 int program22 = 0; // set when in auto sequence 2-2
 int program22Percent = 75; // initial value, in percent,  for servo in auto sequence 2-2
-int program22RunTime = 150; // initial time in, in seconds, for auto sequence 2-2
-bool programMode2 = 2;
+unsigned long program22RunTime = 150; // initial time in, in seconds, for auto sequence 2-2
+bool programMode2 = 0;
 
 int displayTime = 0;
 //String timeString = "";
