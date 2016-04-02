@@ -17,13 +17,13 @@ Servo myservo;  // create servo object to control a servo
 LiquidCrystal595 lcd(5, 6, 7); // 3 pin LCD: datapin, latchpin, clockpin
 // LiquidCrystal lcd(7, 6, 5, 4, 3, 2); // 6 pin LCD
 
-///// manual inputs
+///// analog inputs
 int manualAnglePin = 0;  // analog pin used to connect the potentiometer
 int maxAnglePin = 1; // analog pin used to set max angle
 int zeroOffsetPin = 2; // analog pin used to set zero angle
 
 int manualAngleValue;    // variable to read the value from the analog pin
-int lastmanualAngleValue = 0; // stores last value from pot
+int manualAngleValueLast = 0; // stores last value from pot
 String potString = ""; // holds pot value as string
 int potLength = 0; // holds number of characters for potString
 int potPosition = 0; // holds position of print to lcd
@@ -55,25 +55,25 @@ int startStopButtonState = 0;
 int program1ButtonState = 0;
 int program2ButtonState = 0;
 
-int lastStartStopButtonState = 0;
-int lastProgram1ButtonState = 0;
-int lastProgram2ButtonState = 0;
+int startStopButtonStateLast = 0;
+int program1ButtonStateLast = 0;
+int program2ButtonStateLast = 0;
 
 ///// Man/Auto-switch
 const int autoSwitch = 8;
 //const int manSwitch = 1;
 int autoSwitchState = 0;
 //int manSwitchState = 0;
-int lastAutoSwitchState = 0;
-// inst lastManSwitchState = 0;
+int autoSwitchStateLast = 0;
+// inst manSwitchStateLast = 0;
 
 ///// Left/Right-switch
 const int leftSwitch = 10;
 //const int rightSwitch = 10;
 int leftSwitchState = 0;
 //int rightSwitchState = 1;
-int lastLeftSwitchState = 0;
-// int lastRightSwitchState = 0;
+int leftSwitchStateLast = 0;
+// int rightSwitchStateLast = 0;
 
 ///// Rotary encoder
 const int encoderCLK = 1; // Rotary encoder CLK signal
@@ -82,31 +82,31 @@ const int encoderSW = 3; // Rotary encoders switch, goes LOW when pressed
 int encoderCLKState = 0;
 int encoderDTState = 0;
 int encoderSWState = 0;
-int lastEncoderDTState = 0;
-int lastEncoderSWState = 0;
+int encoderDTStateLast = 0;
+int encoderSWStateLast = 0;
 
 long startStopTimeMillis = 0; // the last time Start/Stop was toggled
 long encoderSWTimeMillis = 0; // the last time encoder button was toggled
 long debounce = 200;   // the debounce time, increase if the output flickers
 
-int program11 = 0; // set when in auto sequence 1-1
+bool program11 = 0; // set when in auto sequence 1-1
 int program11Percent = 25; // initial value, in percent, for servo in auto sequence 1-1
 unsigned long program11RunTime = 60; // initial time, in seconds, for auto sequence 1-1
 unsigned long program11StartTime = 0;
-int program12 = 0; // set when in auto sequence 1-2
+bool program12 = 0; // set when in auto sequence 1-2
 int program12Percent = 50; // initial value, in percent,  for servo in auto sequence 1-2
 unsigned long program12RunTime = 120; // initial time, in seconds, for auto sequence 1-2
 unsigned long program12StartTime = 0;
 bool programMode1 = 0;
-int programModeValue = 0; // what of the values are being programmed
+int programModeValue = 0; // which of the values are being programmed
 unsigned long blinkColonMillis;
 //bool blinkOut = 0;
 String blinkChar = "=";
 
-int program21 = 0; // set when in auto sequence 2-1
+bool program21 = 0; // set when in auto sequence 2-1
 int program21Percent = 50; // initial value, in percent,  for servo in auto sequence 2-1
 unsigned long program21RunTime = 30; // initial time, in seconds, for auto sequence 2-1
-int program22 = 0; // set when in auto sequence 2-2
+bool program22 = 0; // set when in auto sequence 2-2
 int program22Percent = 75; // initial value, in percent,  for servo in auto sequence 2-2
 unsigned long program22RunTime = 150; // initial time in, in seconds, for auto sequence 2-2
 bool programMode2 = 0;
@@ -165,12 +165,12 @@ void loop() {
   }
 
   ///// Check if Manual/Auto-switch is switched. Then stop everything
-  if (autoSwitchState != lastAutoSwitchState) {
+  if (autoSwitchState != autoSwitchStateLast) {
     spinning = 0;
     servoAngle = 0;
     powerControl();
     writeLCD();
-    lastAutoSwitchState = autoSwitchState;
+    autoSwitchStateLast = autoSwitchState;
   }
 
   ///// Set zero offset for servo
@@ -357,14 +357,14 @@ void writeLCDProgramMode(int firstPercent, int firstRunTime, int secondPercent, 
 void manualRun() {
   ////////////////////////////////////////// Checking inputs ///////////////////////////////////////////
   ///// Potentiometer
-  if (manualAngleValue < lastmanualAngleValue - 5 || manualAngleValue > lastmanualAngleValue + 5) {
+  if (manualAngleValue < manualAngleValueLast - 5 || manualAngleValue > manualAngleValueLast + 5) {
     powerControl();
     writeLCD();
-    lastmanualAngleValue = manualAngleValue;
+    manualAngleValueLast = manualAngleValue;
   }
   ///// Start/Stop-button
-  if (startStopButtonState != lastStartStopButtonState) {
-    if (startStopButtonState == 1 && lastStartStopButtonState == 0 && millis() - startStopTimeMillis > debounce) {
+  if (startStopButtonState != startStopButtonStateLast) {
+    if (startStopButtonState == 1 && startStopButtonStateLast == 0 && millis() - startStopTimeMillis > debounce) {
       if (spinning == 1) {
         spinning = 0;
       }
@@ -376,14 +376,14 @@ void manualRun() {
       powerControl();
     }
     writeLCD();
-    lastStartStopButtonState = startStopButtonState;
+    startStopButtonStateLast = startStopButtonState;
     startStopTimeMillis = millis();
   }
   ///// Left/Right-switch
-  if (leftSwitchState != lastLeftSwitchState) {
+  if (leftSwitchState != leftSwitchStateLast) {
     powerControl();
     writeLCD();
-    lastLeftSwitchState = leftSwitchState;
+    leftSwitchStateLast = leftSwitchState;
   }
   if (leftSwitchState == 1) {
     servoLow = 90 - maxAngle;
@@ -399,18 +399,18 @@ void manualRun() {
 void autoRun() {
   ////////////////////////////////////////// Checking inputs ///////////////////////////////////////////
 
-  if (program1ButtonState != lastProgram1ButtonState) {
-    if (program1ButtonState == 1 && lastProgram1ButtonState == 0 && millis() - program11StartTime > debounce) {
+  if (program1ButtonState != program1ButtonStateLast) {
+    if (program1ButtonState == 1 && program1ButtonStateLast == 0 && millis() - program11StartTime > debounce) {
       program11 = 1;
       program11StartTime = millis();
     }
     writeLCD();
-    lastProgram1ButtonState = program1ButtonState;
+    program1ButtonStateLast = program1ButtonState;
   }
   /*
-    if (program2ButtonState != lastProgram2ButtonState) {
+    if (program2ButtonState != program2ButtonStateLast) {
       writeLCD();
-      lastProgram2ButtonState = program2ButtonState;
+      program2ButtonStateLast = program2ButtonState;
     }
     if (program11 == 1) {
       if (leftSwitchState == 1) {
@@ -425,8 +425,8 @@ void autoRun() {
     }
   */
   ///// Start/Stop-button
-  if (startStopButtonState != lastStartStopButtonState) {
-    if (startStopButtonState == 1 && lastStartStopButtonState == 0 && millis() - startStopTimeMillis > debounce) {
+  if (startStopButtonState != startStopButtonStateLast) {
+    if (startStopButtonState == 1 && startStopButtonStateLast == 0 && millis() - startStopTimeMillis > debounce) {
       if (spinning == 1) {
         spinning = 0;
       }
@@ -435,7 +435,7 @@ void autoRun() {
       powerControl();
     }
     writeLCD();
-    lastStartStopButtonState = startStopButtonState;
+    startStopButtonStateLast = startStopButtonState;
     startStopTimeMillis = millis();
   }
 
@@ -494,29 +494,40 @@ void programSequence1() {
   encoderDTState = digitalRead(encoderDT);
   encoderSWState = digitalRead(encoderSW);
 
-   if ((lastEncoderDTState == 0) && (encoderDTState == 1)) {
-     if (encoderCLKState == 0) {
-       program11Percent--;
-       if (program11Percent <= 0) {
-        program11Percent = 0;
-       }
-     } else {
-       program11Percent++;
-       if (program11Percent >= 100) {
-        program11Percent = 100;
-       }
-     }
-     writeLCDProgramMode(program11Percent, program11RunTime, program12Percent, program12RunTime);
-   } 
-   lastEncoderDTState = encoderDTState;
+  if ((encoderDTStateLast == 0) && (encoderDTState == 1)) {
+    if (programModeValue == 1) { // setting first servo degrees
+      if (encoderCLKState == 0) {
+        program11Percent--;
+        if (program11Percent <= 0) {
+          program11Percent = 0;
+        }
+      } else {
+        program11Percent++;
+        if (program11Percent >= 100) {
+          program11Percent = 100;
+        }
+      }
+    }
+    else if (programModeValue == 2) { // setting first time
+      //
+    }
+    else if (programModeValue == 3) { // setting second servo degrees
+      //
+    }
+    else { // setting second time
+      //
+    }
+    writeLCDProgramMode(program11Percent, program11RunTime, program12Percent, program12RunTime);
+  }
+  encoderDTStateLast = encoderDTState;
 
-  if (encoderSWState != lastEncoderSWState) {
-    if (encoderSWState == 0 && lastEncoderSWState == 1 && millis() - encoderSWTimeMillis > debounce) {
+  if (encoderSWState != encoderSWStateLast) {
+    if (encoderSWState == 0 && encoderSWStateLast == 1 && millis() - encoderSWTimeMillis > debounce) {
       programModeValue++;
       if (programModeValue >= 5) {
         programModeValue = 1;
       }
-      lastEncoderSWState = encoderSWState;
+      encoderSWStateLast = encoderSWState;
       encoderSWTimeMillis = millis();
     }
   }
