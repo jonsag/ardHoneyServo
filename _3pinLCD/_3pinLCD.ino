@@ -13,6 +13,9 @@
 
 #include <LiquidCrystal595.h>    // include the library
 LiquidCrystal595 lcd(5, 6, 7);     // datapin, latchpin, clockpin
+// Pin 5 - Data Enable/SER
+// Pin 6 - Clock/SCL
+// Pin 7 - SCK
 
 void setup() {
     lcd.begin(16,2);             // 16 characters, 2 rows

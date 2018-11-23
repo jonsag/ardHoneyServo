@@ -14,8 +14,20 @@
 Servo myservo;  // create servo object to control a servo
 
 ///// initialize the LCD library with the numbers of the interface pins
-LiquidCrystal595 lcd(5, 6, 7); // 3 pin LCD: datapin, latchpin, clockpin
 // LiquidCrystal lcd(7, 6, 5, 4, 3, 2); // 6 pin LCD
+LiquidCrystal595 lcd(5, 6, 7); // 3 pin LCD: datapin, latchpin, clockpin
+// Pin 5 - D - Data Enable/SER
+// Pin 6 - Clock/SCL
+// Pin 7 - SCK
+/*
+ 74595
+ DIP				Arduino
+ 10 - Reset - GND
+ 11 - Shift Clock - 7
+ 12 - Latch Clock - 6
+ 13 - Output Enable - Vcc
+ 14 - Data - 5
+ */
 
 ///// analog inputs
 int manualAnglePin = 0;  // analog pin used to connect the potentiometer
