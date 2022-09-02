@@ -5,12 +5,45 @@
   github.com/jonsag/ardHoneyServo
 */
 
-///// initialize the LCD library with the numbers of the interface pins
+#include <Servo.h>
+#include <LiquidCrystal595.h> // 3 pin LCD
+//#include <LiquidCrystal.h> // 6 pin LCD
+
+Servo myServo; // create servo object to control a servo
+
+/**********
+ * Digital pins
+ **********/
+#define encoderCLK 2 // Rotary encoder CLK signal
+#define encoderDT 3 // Rotary encoder DT signal
+#define encoderSW 4  // Rotary encoders switch, goes LOW when pressed
+
+#define spinnerRelay 5 // pin for spinner relay
+
+#define servoPin 6
+
+#define autoSwitch 9
+#define leftSwitch 10
+#define startStopButton 11
+#define program1Button 12
+#define program2Button 13
+
+/**********
+ * Analog pins
+ **********/
+#define manualAnglePin A0 // analog pin used to connect the potentiometer
+#define maxAnglePin A1    // analog pin used to set max angle
+#define zeroOffsetPin A2  // analog pin used to set zero angle
+
+#define data A3
+#define latch A4
+#define clock A5
+
+/**********
+ * LCD
+ **********/
 // LiquidCrystal lcd(7, 6, 5, 4, 3, 2); // 6 pin LCD
-LiquidCrystal595 lcd(5, 6, 7); // 3 pin LCD: datapin, latchpin, clockpin
-// Pin 5 - D - Data Enable/SER
-// Pin 6 - Clock/SCL
-// Pin 7 - SCK
+LiquidCrystal595 lcd(data, latch, clock); // 3 pin LCD: datapin, latchpin, clockpin
 /*
  74595
  DIP				Arduino
@@ -20,11 +53,6 @@ LiquidCrystal595 lcd(5, 6, 7); // 3 pin LCD: datapin, latchpin, clockpin
  13 - Output Enable - Vcc
  14 - Data - 5
  */
-
-///// analog inputs
-int manualAnglePin = 0; // analog pin used to connect the potentiometer
-int maxAnglePin = 1;    // analog pin used to set max angle
-int zeroOffsetPin = 2;  // analog pin used to set zero angle
 
 int manualAngleValue;         // variable to read the value from the analog pin
 int manualAngleValueLast = 0; // stores last value from pot
@@ -45,15 +73,7 @@ int motorSpeed = 0;
 int servoLow = 0;
 int servoHigh = 0;
 
-///// Digital outputs:
-int spinnerRelay = 4; // pin for spinner relay
 bool spinning = 0;    // high if spinner is spinning
-
-///// Digital inputs:
-///// Buttons:
-const int startStopButton = 11;
-const int program1Button = 12;
-const int program2Button = 13;
 
 int startStopButtonState = 0;
 int program1ButtonState = 0;
@@ -64,15 +84,13 @@ int program1ButtonStateLast = 0;
 int program2ButtonStateLast = 0;
 
 ///// Man/Auto-switch
-const int autoSwitch = 8;
 // const int manSwitch = 1;
 int autoSwitchState = 0;
 // int manSwitchState = 0;
 int autoSwitchStateLast = 0;
 // inst manSwitchStateLast = 0;
 
-///// Left/Right-switch
-const int leftSwitch = 10;
+
 // const int rightSwitch = 10;
 int leftSwitchState = 0;
 // int rightSwitchState = 1;
@@ -80,9 +98,7 @@ int leftSwitchStateLast = 0;
 // int rightSwitchStateLast = 0;
 
 ///// Rotary encoder
-const int encoderCLK = 1; // Rotary encoder CLK signal
-const int encoderDT = 2;  // Rotary encoder DT signal
-const int encoderSW = 3;  // Rotary encoders switch, goes LOW when pressed
+
 int encoderCLKState = 0;
 int encoderDTState = 0;
 int encoderSWState = 0;
