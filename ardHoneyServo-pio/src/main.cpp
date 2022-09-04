@@ -9,15 +9,15 @@
 
 void setup()
 {
-  ///// set up the LCD's number of columns and rows:
+  // set up the LCD's number of columns and rows
   lcd.begin(16, 2); // define LCD layout
+  
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.print("Booting...");
   delay(500);
   lcd.setCursor(0, 1);
   lcd.print("Init. in/outputs");
-  delay(500);
 
   pinMode(startStopButton, INPUT);
   pinMode(program1Button, INPUT);
@@ -30,11 +30,13 @@ void setup()
   pinMode(encoderCLK, INPUT);
   pinMode(encoderDT, INPUT);
   pinMode(encoderSW, INPUT);
+  delay(500);
 
   lcd.setCursor(0, 1);
   lcd.print("Attaching servo ");
   myServo.attach(servoPin); // attaches the servo on pin 9 to the servo object
   delay(500);
+
   lcd.clear();
 }
 
